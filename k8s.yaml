@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netcat
+  template:
+    metadata:
+      labels:
+        app: netcat
+    spec:
+      containers:
+      - name: netcat
+        image: weinong/netcat:latest
+        imagePullPolicy: Always
+        args:
+        - "-lkuv"
+        - "9000"
+        ports:
+        - name: nc
+          containerPort: 9000
+          protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: netcat-lb
+  name: netcat-lb
+  namespace: default
+spec:
+  ports:
+  - name: nc
+    port: 9000
+    protocol: UDP
+    targetPort: 9000
+  sessionAffinity: None
+  selector:
+    app: netcat
+  type: LoadBalancer
+status:
+  loadBalancer: {}
